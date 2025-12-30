@@ -1,46 +1,39 @@
 package handlers
 
 import (
-	"encoding/json"
+	"advancedBackend/services"
 	"log/slog"
 	"net/http"
-	"time"
 )
 
-type Time struct {
-	CurrentTime string `json:"currentTime"`
-	RequestID   string `json:"requestID"`
+type TimeHandler struct {
+	Service *services.TimeService
 }
 
-func TimeHandler(w http.ResponseWriter, r *http.Request) {
-	// Retrieving the requestID
-	requestId := r.Context().Value("requestID").(string)
-
-	currentTime := time.Now() // find current time
-
-	var timeFormat string = "2006/01/02, 03:04 PM"
-	formattedTime := currentTime.Format(timeFormat) // formatting time in string
-
-	jsonString := Time{CurrentTime: formattedTime, RequestID: requestId} // creating a json string
-	jsonData, err := json.Marshal(jsonString)                            // converting in JSON
+func (h *TimeHandler) HandleTimeFunction(w http.ResponseWriter, r *http.Request) {
+	// sending the request to service
+	responseData, currentTime, requestId, err := h.Service.GetTime(r)
 
 	if err != nil {
-		slog.Error(
-			"Error while Marshaling the Health API response",
-			slog.Any("Error", err),
-			slog.String("RequestID", requestId),
-		)
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Error while processing the data!"}`))
+		w.Write([]byte(`{"error":"Error while processing the request!"}`))
+
+		slog.Error(
+			"Time API Failed!",
+			slog.Any("Error:", err),
+		)
+		return
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(responseData))
+
+		slog.Info(
+			"Time API Response Sent!",
+			slog.String("RequestID", requestId),
+			slog.String("CurrentTime", currentTime),
+		)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(jsonData))
-	slog.Info(
-		"Time API Response Sent!",
-		slog.String("RequestID", requestId),
-		slog.String("CurrentTime", formattedTime),
-	)
 }

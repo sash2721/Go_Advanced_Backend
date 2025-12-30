@@ -29,7 +29,7 @@ func RequestMiddleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "requestID", trimmedRequestID)
 		slog.Info(
-			"Added the RequestId to the context:",
+			"Added the RequestID to the context:",
 			slog.String("RequestID", trimmedRequestID),
 			slog.Any("Context", ctx),
 		)

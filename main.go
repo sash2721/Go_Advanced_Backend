@@ -3,6 +3,7 @@ package main
 import (
 	"advancedBackend/handlers"
 	"advancedBackend/middlewares"
+	"advancedBackend/services"
 	"context"
 	"fmt"
 	"log/slog"
@@ -18,24 +19,28 @@ import (
 func main() {
 	r := chi.NewRouter()
 
-	// Apply RequestMiddleware to every route on this router
+	// Applying middlewares to all the routes
 	r.Use(middlewares.RequestMiddleware)
-
-	// Apply LoggingMiddleware to every route on this router
 	r.Use(middlewares.LoggingMiddleware)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"message": "Chi Router Started"}`))
 	})
 
-	// Adding the Health route
-	r.Get("/health", handlers.HealthHandler)
+	// Creating the services
+	healthService := services.NewHealthService()
+	timeService := services.NewTimeService()
+	echoService := services.NewEchoService()
 
-	// Adding the Time route
-	r.Get("/time", handlers.TimeHandler)
+	// Creating handlers and injecting the created services into them
+	healthHandler := &handlers.HealthHandler{Service: healthService}
+	timeHandler := &handlers.TimeHandler{Service: timeService}
+	echoHandler := &handlers.EchoHandler{Service: echoService}
 
-	// Adding the Echo route
-	r.Post("/echo", handlers.EchoHandler)
+	// Registering the routes
+	r.Get("/health", healthHandler.HandleHealthFunction)
+	r.Get("/time", timeHandler.HandleTimeFunction)
+	r.Post("/echo", echoHandler.HandleEchoFunction)
 
 	// defining the PORT
 	var PORT string = ":3000"

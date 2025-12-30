@@ -1,13 +1,17 @@
 package handlers
 
 import (
-	"io"
+	"advancedBackend/services"
 	"log/slog"
 	"net/http"
 	"time"
 )
 
-func EchoHandler(w http.ResponseWriter, r *http.Request) {
+type EchoHandler struct {
+	Service *services.EchoService
+}
+
+func (h *EchoHandler) HandleEchoFunction(w http.ResponseWriter, r *http.Request) {
 	// check if the request is a POST request or not
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -15,38 +19,33 @@ func EchoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// extracting the requestId from the request context
-	requestId := r.Context().Value("requestID").(string)
-
-	// read the request body
-	body, err := io.ReadAll(r.Body)
+	// calling the service
+	responseBody, requestId, ctx, err := h.Service.EchoResponse(r)
 
 	if err != nil {
-		slog.Error(
-			"Error while reading the Request Body",
-			slog.Any("Error", err),
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`"error":"Error while processing the request!"`))
+
+		slog.Info(
+			"Echo API Failed!",
 			slog.String("RequestID", requestId),
+			slog.String("Body", string(responseBody)),
 		)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error": "Failed to read the request body!"}`))
 		return
 	}
-	defer r.Body.Close() // close the connection at the end
-
-	// read the context
-	ctx := r.Context()
 
 	select {
 	case <-time.After(2 * time.Second):
 		// return the echo json back
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write(body)
+		w.Write(responseBody)
 
 		slog.Info(
 			"Echo API Response Sent!",
 			slog.String("RequestID", requestId),
-			slog.String("Body", string(body)),
+			slog.String("Body", string(responseBody)),
 		)
 	case <-ctx.Done():
 		slog.Error(
