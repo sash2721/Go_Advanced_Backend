@@ -20,12 +20,12 @@ func (h *EchoHandler) HandleEchoFunction(w http.ResponseWriter, r *http.Request)
 	}
 
 	// calling the service
-	responseBody, requestId, ctx, err := h.Service.EchoResponse(r)
+	responseBody, requestId, ctx, err, errorJsonData := h.Service.EchoResponse(r)
 
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`"error":"Error while processing the request!"`))
+		w.Write(errorJsonData)
 
 		slog.Info(
 			"Echo API Failed!",

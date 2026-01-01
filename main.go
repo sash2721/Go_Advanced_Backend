@@ -1,6 +1,7 @@
 package main
 
 import (
+	"advancedBackend/configs"
 	"advancedBackend/handlers"
 	"advancedBackend/middlewares"
 	"advancedBackend/services"
@@ -42,15 +43,20 @@ func main() {
 	r.Get("/time", timeHandler.HandleTimeFunction)
 	r.Post("/echo", echoHandler.HandleEchoFunction)
 
-	// defining the PORT
-	var PORT string = ":3000"
+	// getting the configs
+	serverConfig := configs.GetServerConfig()
 
-	server := &http.Server{
-		Addr:         PORT,
-		Handler:      r,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  60 * time.Second,
+	// initialising the server
+	var server *http.Server
+
+	if serverConfig.Env == "development" {
+		server = &http.Server{
+			Addr:         serverConfig.Port,
+			Handler:      r,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
+			IdleTimeout:  60 * time.Second,
+		}
 	}
 
 	// Creating channel to listen for OS signals

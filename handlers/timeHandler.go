@@ -12,12 +12,12 @@ type TimeHandler struct {
 
 func (h *TimeHandler) HandleTimeFunction(w http.ResponseWriter, r *http.Request) {
 	// sending the request to service
-	responseData, currentTime, requestId, err := h.Service.GetTime(r)
+	responseData, currentTime, requestId, err, errJsonData := h.Service.GetTime(r)
 
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error":"Error while processing the request!"}`))
+		w.Write(errJsonData)
 
 		slog.Error(
 			"Time API Failed!",

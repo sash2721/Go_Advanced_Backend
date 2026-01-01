@@ -1,6 +1,7 @@
 package services
 
 import (
+	"advancedBackend/errors"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -18,7 +19,7 @@ func NewTimeService() *TimeService {
 	return &TimeService{}
 }
 
-func (*TimeService) GetTime(r *http.Request) ([]byte, string, string, error) {
+func (*TimeService) GetTime(r *http.Request) ([]byte, string, string, error, []byte) {
 	// Retrieving the requestID
 	requestId := r.Context().Value("requestID").(string)
 
@@ -36,8 +37,10 @@ func (*TimeService) GetTime(r *http.Request) ([]byte, string, string, error) {
 			slog.Any("Error", err),
 			slog.String("RequestID", requestId),
 		)
-		return nil, "", "", err
+		errorJsonData, internalServerError := errors.NewInternalServerError("Error while Marshaling the Time API response", err)
+
+		return nil, "", "", internalServerError.Error, errorJsonData
 	}
 
-	return jsonData, formattedTime, requestId, nil
+	return jsonData, formattedTime, requestId, nil, nil
 }

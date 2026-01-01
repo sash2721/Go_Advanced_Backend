@@ -1,6 +1,7 @@
 package services
 
 import (
+	"advancedBackend/errors"
 	"context"
 	"io"
 	"log/slog"
@@ -13,7 +14,7 @@ func NewEchoService() *EchoService {
 	return &EchoService{}
 }
 
-func (s *EchoService) EchoResponse(r *http.Request) ([]byte, string, context.Context, error) {
+func (s *EchoService) EchoResponse(r *http.Request) ([]byte, string, context.Context, error, []byte) {
 	// extracting the requestId from the request context
 	requestId := r.Context().Value("requestID").(string)
 
@@ -29,9 +30,11 @@ func (s *EchoService) EchoResponse(r *http.Request) ([]byte, string, context.Con
 			slog.Any("Error", err),
 			slog.String("RequestID", requestId),
 		)
-		return nil, requestId, nil, err
+		errorJsonData, internalServerError := errors.NewInternalServerError("Error while reading the request body", err)
+
+		return nil, requestId, nil, internalServerError.Error, errorJsonData
 	}
 	defer r.Body.Close() // close the connection at the end
 
-	return response, requestId, ctx, err
+	return response, requestId, ctx, nil, nil
 }

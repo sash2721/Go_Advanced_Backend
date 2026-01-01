@@ -1,6 +1,7 @@
 package services
 
 import (
+	"advancedBackend/errors"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -17,7 +18,7 @@ func NewHealthService() *HealthService {
 	return &HealthService{}
 }
 
-func (s *HealthService) GetHealth(r *http.Request) ([]byte, string, error) {
+func (s *HealthService) GetHealth(r *http.Request) ([]byte, string, error, []byte) {
 	// Retrieving the requestID to add in the Response
 	requestId := r.Context().Value("requestID").(string)
 
@@ -33,8 +34,10 @@ func (s *HealthService) GetHealth(r *http.Request) ([]byte, string, error) {
 			slog.Any("Error", err),
 			slog.String("RequestID", requestId),
 		)
-		return nil, requestId, err
+		errorJsonData, internalServerError := errors.NewInternalServerError("Error while Marshaling the Health API response", err)
+
+		return nil, requestId, internalServerError.Error, errorJsonData
 	}
 
-	return jsonData, requestId, nil
+	return jsonData, requestId, nil, nil
 }

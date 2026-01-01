@@ -12,12 +12,12 @@ type HealthHandler struct {
 
 func (h *HealthHandler) HandleHealthFunction(w http.ResponseWriter, r *http.Request) {
 	// calling the service with the request data
-	responseData, requestId, err := h.Service.GetHealth(r)
+	responseData, requestId, err, errJsonData := h.Service.GetHealth(r)
 
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Error while processing the request"}`))
+		w.Write(errJsonData)
 
 		slog.Error(
 			"Health API Failed!",
