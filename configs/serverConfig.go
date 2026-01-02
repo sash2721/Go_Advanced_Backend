@@ -8,8 +8,9 @@ import (
 )
 
 type ServerConfig struct {
-	Port string
-	Env  string
+	Port      string
+	Env       string
+	SecretKey string
 }
 
 func GetServerConfig() *ServerConfig {
@@ -20,8 +21,9 @@ func GetServerConfig() *ServerConfig {
 	}
 
 	serverConfig := &ServerConfig{
-		Port: os.Getenv("PORT"),
-		Env:  os.Getenv("ENV"),
+		Port:      os.Getenv("PORT"),
+		Env:       os.Getenv("ENV"),
+		SecretKey: os.Getenv("SECRET_KEY"),
 	}
 
 	return serverConfig
