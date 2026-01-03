@@ -32,16 +32,28 @@ func main() {
 	healthService := services.NewHealthService()
 	timeService := services.NewTimeService()
 	echoService := services.NewEchoService()
+	authService := services.NewAuthService()
 
 	// Creating handlers and injecting the created services into them
 	healthHandler := &handlers.HealthHandler{Service: healthService}
 	timeHandler := &handlers.TimeHandler{Service: timeService}
 	echoHandler := &handlers.EchoHandler{Service: echoService}
+	authHandler := &handlers.AuthHandler{Service: authService}
 
 	// Registering the routes
+	// Public Routes
+	r.Post("/auth/login", authHandler.HandleLogin)
+	r.Post("/auth/signup", authHandler.HandleSignUp)
 	r.Get("/health", healthHandler.HandleHealthFunction)
-	r.Get("/time", timeHandler.HandleTimeFunction)
-	r.Post("/echo", echoHandler.HandleEchoFunction)
+
+	// Protected Routes
+	r.Group(func(r chi.Router) {
+		// using the auth middleware only for protected routes
+		r.Use(middlewares.AuthMiddleware)
+
+		r.Get("/time", timeHandler.HandleTimeFunction)
+		r.Post("/echo", echoHandler.HandleEchoFunction)
+	})
 
 	// getting the configs
 	serverConfig := configs.GetServerConfig()

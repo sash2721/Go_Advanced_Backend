@@ -36,7 +36,7 @@ func (s *HealthService) GetHealth(r *http.Request) ([]byte, string, error, []byt
 		)
 		errorJsonData, internalServerError := errors.NewInternalServerError("Error while Marshaling the Health API response", err)
 
-		return nil, requestId, internalServerError.Error, errorJsonData
+		return nil, requestId, internalServerError, errorJsonData
 	}
 
 	return jsonData, requestId, nil, nil

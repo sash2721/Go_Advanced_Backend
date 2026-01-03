@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"advancedBackend/errors"
 	"advancedBackend/utils"
 	"context"
 	"log/slog"
@@ -12,6 +13,19 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// extract the JWT auth token from the headers
 		authzToken := r.Header.Get("Authorization")
+
+		if authzToken == "" {
+			slog.Debug(
+				"Invalid Request, auth token not present",
+			)
+
+			errJson, badRequestError := errors.NewBadRequestError("Invalid Request, auth token not present", nil)
+			w.WriteHeader(badRequestError.Code)
+			w.Write(errJson)
+
+			return
+		}
+
 		tokenString := strings.TrimPrefix(authzToken, "Bearer ")
 
 		// validate the auth token

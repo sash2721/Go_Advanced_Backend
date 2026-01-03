@@ -38,7 +38,7 @@ func GenerateToken(userID string, email string) (string, error) {
 			slog.Any("Error", err),
 		)
 		_, customError := errors.NewInternalServerError("Error while signing the token with secret key", err)
-		return "", customError.Error
+		return "", customError
 	}
 
 	return tokenString, nil
@@ -61,7 +61,7 @@ func ValidateToken(token string) (*Claims, error, []byte, int) {
 			slog.Any("Error", err),
 		)
 		errorJson, internalServerError := errors.NewInternalServerError("Error while parsing the token", err)
-		return nil, internalServerError.Error, errorJson, internalServerError.Code
+		return nil, internalServerError, errorJson, internalServerError.Code
 	}
 
 	if !parsedToken.Valid {
@@ -70,7 +70,7 @@ func ValidateToken(token string) (*Claims, error, []byte, int) {
 			slog.Any("Error", err),
 		)
 		errorJson, badRequestError := errors.NewBadRequestError("Invalid Token passed", err)
-		return nil, badRequestError.Error, errorJson, badRequestError.Code
+		return nil, badRequestError, errorJson, badRequestError.Code
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
@@ -81,7 +81,7 @@ func ValidateToken(token string) (*Claims, error, []byte, int) {
 			slog.Any("Error", err),
 		)
 		errorJson, internalServerError := errors.NewInternalServerError("Error while converting the claims", err)
-		return nil, internalServerError.Error, errorJson, internalServerError.Code
+		return nil, internalServerError, errorJson, internalServerError.Code
 	}
 
 	userID := claims["userId"].(string)

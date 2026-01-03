@@ -6,16 +6,24 @@ import (
 )
 
 type InternalServerError struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Error   error  `json:"error"`
+	Code       int    `json:"code"`
+	Message    string `json:"message"`
+	InnerError error  `json:"error"`
+}
+
+// Implement the error interface
+func (e *InternalServerError) Error() string {
+	if e.InnerError != nil {
+		return e.Message + ": " + e.InnerError.Error()
+	}
+	return e.Message
 }
 
 func NewInternalServerError(message string, err error) ([]byte, *InternalServerError) {
 	customError := &InternalServerError{
-		Code:    http.StatusInternalServerError,
-		Message: message,
-		Error:   err,
+		Code:       http.StatusInternalServerError,
+		Message:    message,
+		InnerError: err,
 	}
 
 	jsonData, err := json.Marshal(customError)

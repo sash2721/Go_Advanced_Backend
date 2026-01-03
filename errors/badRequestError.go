@@ -6,20 +6,28 @@ import (
 )
 
 type BadRequestError struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Error   error  `json:"error"`
+	Code       int    `json:"code"`
+	Message    string `json:"message"`
+	InnerError error  `json:"error"`
+}
+
+// Implement the error interface
+func (e *BadRequestError) Error() string {
+	if e.InnerError != nil {
+		return e.Message + ": " + e.InnerError.Error()
+	}
+	return e.Message
 }
 
 func NewBadRequestError(message string, err error) ([]byte, *BadRequestError) {
 	customError := &BadRequestError{
-		Code:    http.StatusBadRequest,
-		Message: message,
-		Error:   err,
+		Code:       http.StatusBadRequest,
+		Message:    message,
+		InnerError: err, // Updated field name
 	}
 
-	jsonData, err := json.Marshal(customError)
-	if err != nil {
+	jsonData, marshalErr := json.Marshal(customError)
+	if marshalErr != nil {
 		return []byte(`{"code":500,"message":"Internal Server Error","error":"Error while marshaling the internal server error"}`), nil
 	}
 

@@ -32,7 +32,7 @@ func (s *EchoService) EchoResponse(r *http.Request) ([]byte, string, context.Con
 		)
 		errorJsonData, internalServerError := errors.NewInternalServerError("Error while reading the request body", err)
 
-		return nil, requestId, nil, internalServerError.Error, errorJsonData
+		return nil, requestId, nil, internalServerError, errorJsonData
 	}
 	defer r.Body.Close() // close the connection at the end
 

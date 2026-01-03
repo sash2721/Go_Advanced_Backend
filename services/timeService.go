@@ -39,7 +39,7 @@ func (*TimeService) GetTime(r *http.Request) ([]byte, string, string, error, []b
 		)
 		errorJsonData, internalServerError := errors.NewInternalServerError("Error while Marshaling the Time API response", err)
 
-		return nil, "", "", internalServerError.Error, errorJsonData
+		return nil, "", "", internalServerError, errorJsonData
 	}
 
 	return jsonData, formattedTime, requestId, nil, nil

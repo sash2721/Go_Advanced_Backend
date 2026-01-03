@@ -18,7 +18,7 @@ func HashPassword(password string) (string, error) {
 			slog.Any("Error", err),
 		)
 		_, customError := errors.NewInternalServerError("Error while hashing the password", err)
-		return "", customError.Error
+		return "", customError
 	}
 
 	return string(hashedPassword), nil
@@ -37,7 +37,7 @@ func ComparePassword(hashedPassword string, password string) error {
 			slog.Any("Error", err),
 		)
 		_, customError := errors.NewInternalServerError("Error while comparing the hashed password with regular password", err)
-		return customError.Error
+		return customError
 	}
 	return nil
 }
